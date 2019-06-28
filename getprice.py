@@ -1,6 +1,8 @@
 """
 Connects to a URL and extract the price of an article,
 perform currency conversion if applies, and print it.
+A file called '.getprice.yaml' must be present in the
+worling directory.
 """
 
 import string
