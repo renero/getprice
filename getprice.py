@@ -1,19 +1,20 @@
 """
-Connects to a URL and extract the price of an article,
-performing currency conversion (if applies), and prints a CSV-like formatted
+Connects to a set of URLs to extract the price value in them,
+performing currency conversion (if applies), and printing a CSV-like formatted
 output with the result.
 
 A file called '.getprice.yaml' must be present in the
 working directory, following the structure:
 
-item_name:
-    url: https://my.store.com/path/to/the/article
-    tag_id: priceblock
-    site_name: amazon
-    currency: EUR
+    item_name:
+        url: https://my.store.com/path/to/the/article
+        tag_id: priceblock             # the HTML tag you want to capture
+        site_name: your site name      # simply for tracking purposes
+        currency: EUR                  # default is EUR. Other values will be
+                                       # converted to EUR (i.e.: GBP)
 
-If the currency is other than the default currency, then it is converted
-using the latest available change rate.
+If the currency is other than the default currency or not present, then
+it is converted using the latest available change rate.
 """
 
 import string
@@ -79,6 +80,15 @@ def retrieve_price(html_code: bytes, tag_id: string):
     return item_price
 
 
+def currency_conversion(article_price: float):
+    if 'currency' in params[item].keys():
+        if params[item]['currency'] != 'EUR':
+            converter = CurrencyRates()
+            article_price = converter.convert(params[item]['currency'], 'EUR',
+                                              article_price)
+    return article_price
+
+
 # Prepare common data structures.
 params = read_params()
 date_string = date.today()
@@ -93,9 +103,7 @@ for item in params.keys():
     price = retrieve_price(request.data, params[item]['tag_id'])
 
     # Currency conversion, if applicable.
-    if params[item]['currency'] != 'EUR':
-        converter = CurrencyRates()
-        price = converter.convert(params[item]['currency'], 'EUR', price)
+    price = currency_conversion(price)
 
     # Printout everything.
     print('{},{},{},{:.2f}'.format(item, params[item]['site_name'],
