@@ -1,3 +1,5 @@
+# getprice
+
 Connects to a URL and extract the price of an article,
 performing currency conversion (if applies), and prints a CSV-like formatted
 output with the result.
