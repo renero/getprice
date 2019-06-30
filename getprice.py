@@ -4,7 +4,7 @@ performing currency conversion (if applies), and printing a CSV-like formatted
 output with the result.
 
 A file called '.getprice.yaml' must be present in the
-working directory, following the structure:
+home directory, following the structure:
 
     item_name:
         url: https://my.store.com/path/to/the/article
@@ -18,13 +18,13 @@ it is converted using the latest available change rate.
 """
 
 import string
-import warnings
-from datetime import date
-
 import urllib3
+import warnings
 import yaml
 from bs4 import BeautifulSoup
+from datetime import date
 from forex_python.converter import CurrencyRates
+from pathlib import Path
 
 warnings.simplefilter('ignore')
 
@@ -35,14 +35,16 @@ def read_params():
     :return:
     """
     default_params_file = '.getprice.yaml'
-    params = {}
-    with open(default_params_file, 'r') as config:
+    parameters = {}
+    params_path: str = str(Path.home().joinpath(default_params_file))
+
+    with open(params_path, 'r') as config:
         try:
-            params = yaml.safe_load(config)
+            parameters = yaml.safe_load(config)
         except yaml.YAMLError as exc:
             print(exc)
 
-    return params
+    return parameters
 
 
 def remove_non_numeric(captured_string: string):
