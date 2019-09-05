@@ -101,12 +101,13 @@ for item in params.keys():
     # Fetch page
     request = requests.get(params[item]['url'])
 
-    # Access HTML tag
-    price = retrieve_price(request.content, params[item]['tag_id'])
+    if request.status_code == 200:
+        # Access HTML tag
+        price = retrieve_price(request.content, params[item]['tag_id'])
 
-    # Currency conversion, if applicable.
-    price = currency_conversion(price)
+        # Currency conversion, if applicable.
+        price = currency_conversion(price)
 
-    # Printout everything.
-    print('{},{},{},{:.2f}'.format(item, params[item]['site_name'],
-                                   date_string, price))
+        # Printout everything.
+        print('{},{},{},{:.2f}'.format(item, params[item]['site_name'],
+                                       date_string, price))
