@@ -18,13 +18,14 @@ it is converted using the latest available change rate.
 """
 
 import string
-import urllib3
 import warnings
+from datetime import date
+from pathlib import Path
+
+import requests
 import yaml
 from bs4 import BeautifulSoup
-from datetime import date
 from forex_python.converter import CurrencyRates
-from pathlib import Path
 
 warnings.simplefilter('ignore')
 
@@ -67,7 +68,7 @@ def remove_non_numeric(captured_string: string):
     return caption
 
 
-def retrieve_price(html_code: bytes, tag_id: string):
+def retrieve_price(html_code, tag_id: string):
     """
     Access the HTML code, searching for a specific ID tag, and treat it as
     a number, returning its float value.
@@ -75,7 +76,7 @@ def retrieve_price(html_code: bytes, tag_id: string):
     :param tag_id: The HTML tag we're looking for.
     :return: The price in float value
     """
-    soup = BeautifulSoup(html_code, 'lxml')
+    soup = BeautifulSoup(html_code)
     item_price = soup.find(id=tag_id).get_text().strip()
     item_price = remove_non_numeric(item_price)
     item_price = float(item_price)
@@ -94,15 +95,14 @@ def currency_conversion(article_price: float):
 # Prepare common data structures.
 params = read_params()
 date_string = date.today()
-http = urllib3.PoolManager()
 
 # Loop over items
 for item in params.keys():
     # Fetch page
-    request = http.request('GET', params[item]['url'])
+    request = requests.get(params[item]['url'])
 
     # Access HTML tag
-    price = retrieve_price(request.data, params[item]['tag_id'])
+    price = retrieve_price(request.content, params[item]['tag_id'])
 
     # Currency conversion, if applicable.
     price = currency_conversion(price)
