@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Connects to a set of URLs to extract the price value in them,
 performing currency conversion (if applies), and printing a CSV-like formatted
